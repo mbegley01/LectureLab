@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "Hello, ComputeSlides",
+  "slides": [
+    {
+      "id": "slide-welcome",
+      "title": "Welcome",
+      "speakerNotes": "Introduce the product wedge: code and math as first-class blocks.",
+      "blocks": [
+        {
+          "id": "b-title",
+          "type": "text",
+          "content": "ComputeSlides"
+        },
+        {
+          "id": "b-sub",
+          "type": "text",
+          "content": "Presentations where code and LaTeX are core — not plugins."
+        }
+      ]
+    }
+  ]
+}
