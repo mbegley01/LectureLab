@@ -1,54 +1,81 @@
 import subprocess
-
-def get_code():
-    #eventually will replace END sentinel with a run button or something on the ui
-    lines = []
-    print("Enter Python code. Type END on a line by itself when finished.")
-
-    while True:
-        line = input()
-        if line == "END":
-            break
-        lines.append(line) 
-    
-    code = "\n".join(lines)
-    return code
-
+import tempfile
+import os
 
 
 def run_python(code: str):
-    print("CODE RECEIVED:")
-    print(repr(code))
 
-    with open("temp.py", "w") as file:
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".py",
+        delete=False
+    ) as file:
+
         file.write(code)
 
+        temp_path = file.name
+
+
     try:
+
         out = subprocess.run(
-            ["python", "temp.py"],
+
+            [
+                "docker",
+                "run",
+
+                "--rm",
+
+                "--network=none",
+
+                "--memory=256m",
+
+                "--cpus=1",
+
+                "--pids-limit=50",
+
+                "-v",
+
+                f"{temp_path}:/sandbox/temp.py",
+
+                "slide-python-runner",
+
+                "python",
+
+                "/sandbox/temp.py"
+
+            ],
+
             capture_output=True,
+
             text=True,
-            timeout=5.5
+
+            timeout=6
         )
 
-        if out.returncode == 0:
-            return {
-                "success": True,
-                "std_out": out.stdout,
-                "std_error": "",
-                "return code":out.returncode
-            }
-        else:
-            return {
-                "success": False,
-                "std_out": out.stdout,
-                "std_error": out.stderr,
-                "return code": out.returncode
-            }
+
+        return {
+            "success": out.returncode == 0,
+
+            "std_out": out.stdout,
+
+            "std_error": out.stderr,
+
+            "return_code": out.returncode
+        }
+
 
     except subprocess.TimeoutExpired:
+
         return {
             "success": False,
+
             "std_out": "",
+
             "std_error": "Timeout"
         }
+
+
+    finally:
+
+        os.remove(temp_path)
